@@ -71,6 +71,7 @@ public class StartAppAd : MonoBehaviour {
 		GUI.DrawTexture (logoRect, logo);
 	}
 
+	#if (!(UNITY_2_6 || UNITY_2_6_1 || UNITY_3_0 || UNITY_3_0_0 || UNITY_3_1 || UNITY_3_2 || UNITY_3_3 || UNITY_3_4 || UNITY_3_5 || UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1))
 	/* AdDisplayListener callbacks */
 	public class AdDisplayListenerImplementation : StartAppWrapper.AdDisplayListener {
 		public AdDisplayListenerImplementation() {}
@@ -100,4 +101,5 @@ public class StartAppAd : MonoBehaviour {
 			Debug.Log ("Ad failed to receive");
 		}
 	}
+	#endif
 }
