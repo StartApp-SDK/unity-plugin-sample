@@ -28,67 +28,6 @@ namespace StartApp {
 			void adDisplayed();
 			void adClicked();
 		}
-
-		/* Implementation of Splash Config for Unity */
-		public class SplashConfig {
-
-			public enum Theme {
-				USER_DEFINED = 0,
-				DEEP_BLUE,
-				SKY,
-				ASHEN_SKY,
-				BLAZE,
-				GLOOMY,
-				OCEAN
-			};
-			
-			public enum Orientation {
-				PORTRAIT = 1,
-				LANDSCAPE,
-				AUTO
-			};
-
-			private AndroidJavaObject javaSplashConfig = null;
-
-			public SplashConfig() {
-				javaSplashConfig = new AndroidJavaObject("com.startapp.android.publish.splash.SplashConfig");
-			}
-
-			public AndroidJavaObject getJavaSplashConfig() {
-				return javaSplashConfig;
-			}
-
-			public SplashConfig setAppName(string appName) {
-				AndroidJavaObject appNameJava = new AndroidJavaObject("java.lang.String", appName);
-				wrapper.Call<AndroidJavaObject>("setAppName", getJavaSplashConfig(), appNameJava);
-				return this;
-			}
-
-			public SplashConfig setTheme(Theme theme) {
-				int themeIndex = (int)theme;
-				AndroidJavaObject themeIndexInteger = new AndroidJavaObject("java.lang.Integer", themeIndex);
-				wrapper.Call<AndroidJavaObject>("setTheme", getJavaSplashConfig(), themeIndexInteger);
-				return this;
-			}
-
-			public SplashConfig setLogo(string fileName) {
-				Texture2D logoTexture = Resources.Load (fileName) as Texture2D;
-				if (logoTexture == null) {
-					throw new ArgumentException("File doesn't exist in Assets/Resources folder", fileName);
-				}
-				byte[] logoByteArray = logoTexture.EncodeToJPG ();
-				string base64string = Convert.ToBase64String(logoByteArray);
-				wrapper.Call<AndroidJavaObject>("setLogo", getJavaSplashConfig(), base64string);
-				return this;
-			}
-
-			public SplashConfig setOrientation(Orientation orientation) {
-				int orientationIndex = (int)orientation;
-				AndroidJavaObject orientationIndexInteger = new AndroidJavaObject("java.lang.Integer", orientationIndex);
-				wrapper.Call<AndroidJavaObject>("setOrientation", getJavaSplashConfig(), orientationIndexInteger);
-				return this;
-			}
-		}
 		
 		/* Implementation of Ad Event Listener for Unity */
 		private class ImplementationAdEventListener : AndroidJavaProxy {
@@ -183,10 +122,6 @@ namespace StartApp {
 			return wrapper.Call<bool>("onBackPressed", new object[] {new OnBackPressedAdDisplayListener(gameObjectName)});
 		}
 
-		public static void showSplash(SplashConfig splashConfig) {
-			init ();
-			wrapper.Call ("showSplash", splashConfig.getJavaSplashConfig());
-		}
 		#else
 		// Unity 4.1 or older - no listener
 		public static bool onBackPressed(string gameObjectName) {
@@ -214,11 +149,6 @@ namespace StartApp {
 		public static bool showAd() {
 			init();
 			return wrapper.Call<bool>("showAd");
-		}
-
-		public static void showSplash() {
-			init ();
-			wrapper.Call ("showSplash");
 		}
 		
 		public static void addBanner() {
