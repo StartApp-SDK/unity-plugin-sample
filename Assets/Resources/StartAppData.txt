@@ -1,2 +1,3 @@
-developerId="DeveloperID"
-applicationId="ApplicationID"
+accountId=AccountID
+applicationId=ApplicationID
+returnads=true

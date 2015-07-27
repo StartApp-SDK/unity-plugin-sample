@@ -1,13 +1,15 @@
 [StartApp][] InApp SDK Unity Example Project
 ======================================
 
-*Updated to InApp SDK version 2.4.15*
+*Updated to InApp SDK version 3.1.1*
 
 This Unity project provides an example of the [StartApp][] InApp SDK Unity integration.
 
 The example application contains the following ads:
+* Splash
+* Interstitial
+* Rewarded Video
 * Banner
-* Interstitial ad with or without callbacks
 * Exit ad for exiting the application with the back button
 
 When integrating the SDK with your application, please make sure to use the latest SDK version, which can be downloaded from our [portal](https://portal.startapp.com).
