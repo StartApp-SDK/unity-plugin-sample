@@ -10,7 +10,7 @@ public class ImportTexture : AssetPostprocessor {
 
 	void OnPreprocessTexture() {
 		TextureImporter importer = assetImporter as TextureImporter;
-		importer.textureType  = TextureImporterType.Advanced;
+		importer.textureType  = TextureImporterType.Default;
 		importer.textureFormat = TextureImporterFormat.RGBA32;
 		importer.isReadable = true;
 
@@ -18,7 +18,7 @@ public class ImportTexture : AssetPostprocessor {
 		if (asset) {
 			EditorUtility.SetDirty(asset);
 		} else {
-			importer.textureType  = TextureImporterType.Advanced;
+			importer.textureType  = TextureImporterType.Default;
 		}
 	}
 }

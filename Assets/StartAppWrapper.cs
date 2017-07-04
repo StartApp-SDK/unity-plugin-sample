@@ -9,7 +9,11 @@ namespace StartApp {
 		private static string accountId;
 		private static string applicationId;
 		private static bool enableReturnAds = true;
-		
+		private static bool isAccountIdUsed = false;
+
+		private static AndroidJavaObject jAppId = null;
+		private static AndroidJavaObject jAccId = null;
+		private static AndroidJavaObject jEnableReturnAds = null;
 		private static AndroidJavaClass unityClass;
 		private static AndroidJavaObject currentActivity;
 		private static AndroidJavaObject wrapper;
@@ -26,7 +30,7 @@ namespace StartApp {
 			void adDisplayed();
 			void adClicked();
 		}
-
+		
 		public interface VideoListener {
 			void onVideoCompleted();
 		}
@@ -35,7 +39,6 @@ namespace StartApp {
 			AUTOMATIC = 1,
 			FULLPAGE,
 			OFFERWALL,
-			VIDEO,
 			REWARDED_VIDEO,
 			[Obsolete]
 			OVERLAY
@@ -63,7 +66,7 @@ namespace StartApp {
 			
 			public SplashConfig() {
 				init();
-				javaSplashConfig = new AndroidJavaObject("com.startapp.android.publish.splash.SplashConfig");
+				javaSplashConfig = new AndroidJavaObject("com.startapp.android.publish.ads.splash.SplashConfig");
 			}
 			
 			public AndroidJavaObject getJavaSplashConfig() {
@@ -87,7 +90,7 @@ namespace StartApp {
 				byte[] logoByteArray = null;
 				Texture2D logoTexture = Resources.Load (fileName) as Texture2D;
 				if (logoTexture != null) {
-					logoByteArray = logoTexture.EncodeToJPG ();
+					logoByteArray = logoTexture.EncodeToPNG ();
 				}
 				wrapper.Call<AndroidJavaObject>("setLogo", getJavaSplashConfig(), logoByteArray);
 				return this;
@@ -105,7 +108,7 @@ namespace StartApp {
 		private class ImplementationAdEventListener : AndroidJavaProxy {
 			private AdEventListener listener = null;
 			
-			public ImplementationAdEventListener(AdEventListener listener) : base("com.startapp.android.publish.AdEventListener") {
+			public ImplementationAdEventListener(AdEventListener listener) : base("com.startapp.android.publish.adsCommon.adListeners.AdEventListener") {
 				this.listener = listener;
 			}
 			
@@ -120,22 +123,27 @@ namespace StartApp {
 					listener.onFailedToReceiveAd();
 				}
 			}
-
+			
 			int hashCode() {
 				return listener.GetHashCode();
 			}
-
+			
 			bool equals(AndroidJavaObject o) {
 				int otherHash = o.Call<int>("hashCode");
 				return otherHash == listener.GetHashCode();
 			}
+			
+			// Without this we get null when printing 
+			String toString() {
+                return "ImplementationAdEventListener: " + hashCode();
+            }
 		}
 		
 		/* Implementation of Ad Display Listener for Unity */
 		private class ImplementationAdDisplayListener : AndroidJavaProxy {
 			private AdDisplayListener listener = null;
 			
-			public ImplementationAdDisplayListener(AdDisplayListener listener) : base("com.startapp.android.publish.AdDisplayListener"){
+			public ImplementationAdDisplayListener(AdDisplayListener listener) : base("com.startapp.android.publish.adsCommon.adListeners.AdDisplayListener"){
 				this.listener = listener;
 			}
 			
@@ -156,7 +164,7 @@ namespace StartApp {
 					listener.adClicked();
 				}
 			}
-
+			
 			int hashCode() {
 				return listener.GetHashCode();
 			}
@@ -165,6 +173,11 @@ namespace StartApp {
 				int otherHash = o.Call<int>("hashCode");
 				return otherHash == listener.GetHashCode();
 			}
+			
+			// Without this we get null when printing 
+			String toString() {
+                return "ImplementationAdDisplayListener: " + hashCode();
+            }
 		}
 		
 		/* Implementation of Ad Display Listener for Unity */
@@ -172,7 +185,7 @@ namespace StartApp {
 			private string gameObjectName = null;
 			private bool clicked = false;
 			
-			public OnBackPressedAdDisplayListener(string gameObjectName) : base("com.startapp.android.publish.AdDisplayListener") {
+			public OnBackPressedAdDisplayListener(string gameObjectName) : base("com.startapp.android.publish.adsCommon.adListeners.AdDisplayListener") {
 				this.gameObjectName = gameObjectName;
 			}
 			
@@ -195,12 +208,12 @@ namespace StartApp {
 				
 			}
 		}
-
+		
 		/* Implementation of Video Listener for Unity */
 		private class ImplementationVideoListener : AndroidJavaProxy {
 			private VideoListener listener = null;
 			
-			public ImplementationVideoListener(VideoListener listener) : base("com.startapp.android.publish.video.VideoListener"){
+			public ImplementationVideoListener(VideoListener listener) : base("com.startapp.android.publish.adsCommon.VideoListener"){
 				this.listener = listener;
 			}
 			
@@ -210,7 +223,7 @@ namespace StartApp {
 				}
 			}
 		}
-
+		
 		public static void setVideoListener(VideoListener listener) {
 			init ();
 			wrapper.Call ("setVideoListener", new ImplementationVideoListener(listener));
@@ -227,7 +240,7 @@ namespace StartApp {
 		public static void loadAd(AdMode adMode, AdEventListener listener) {
 			loadAd (adMode, listener, false);
 		}
-
+		
 		private static void loadAd(AdMode adMode, AdEventListener listener, bool is3D) {
 			init();
 			int adModeIndex = (int)adMode;
@@ -244,6 +257,22 @@ namespace StartApp {
 			init();
 			return wrapper.Call<bool>("showAd", new object[] {new ImplementationAdDisplayListener(listener)});
 		}
+
+        public static bool showAd(String adTag) {
+            init();
+            AndroidJavaObject objTag = new AndroidJavaObject("java.lang.String", adTag);
+            return wrapper.Call<bool>("showAd", objTag);
+        }
+
+        public static bool showAd(String adTag, AdDisplayListener listener) {
+            if (adTag == null) {
+                return showAd(listener);
+            }
+            
+            init();
+            AndroidJavaObject objTag = new AndroidJavaObject("java.lang.String", adTag);
+			return wrapper.Call<bool>("showAd", new object[] {adTag, new ImplementationAdDisplayListener(listener)});
+        }
 		
 		public static bool onBackPressed(string gameObjectName) {
 			init();
@@ -259,7 +288,7 @@ namespace StartApp {
 			init ();
 			wrapper.Call ("showSplash", splashConfig.getJavaSplashConfig());
 		}
-
+		
 		#else
 		// Unity 4.1 or older - no listener
 		public static bool onBackPressed(string gameObjectName) {
@@ -267,7 +296,7 @@ namespace StartApp {
 			return wrapper.Call<bool>("onBackPressed");
 		}
 		#endif
-		
+
 		public enum BannerPosition {
 			BOTTOM,
 			TOP
@@ -278,26 +307,15 @@ namespace StartApp {
 			STANDARD,
 			THREED
 		};
-		
-		public static void loadAd() {
-			init ();
-			wrapper.Call("loadAd");
+
+		public static bool checkIfBannerExists(BannerPosition bannerPosition) {
+			AndroidJavaObject objPosition = getBannerPositionObject (bannerPosition);
+			return wrapper.Call<bool> ("checkIfBannerExists", objPosition);
 		}
-		
-		public static bool showAd() {
-			init();
-			return wrapper.Call<bool>("showAd");
-		}
-		
-		public static void addBanner() {
-			addBanner(BannerType.AUTOMATIC, BannerPosition.BOTTOM);
-		}
-		
-		public static void addBanner(BannerType bannerType, BannerPosition position) {
+
+		private static AndroidJavaObject getBannerPositionObject(BannerPosition bannerPosition) {
 			int pos = 1;
-			int type = 1;
-			// Select position
-			switch(position){
+			switch(bannerPosition) {
 			case BannerPosition.BOTTOM:
 				pos = 1;
 				break;
@@ -306,8 +324,11 @@ namespace StartApp {
 				break;
 			}
 			AndroidJavaObject objPosition = new AndroidJavaObject("java.lang.Integer", pos);
-			
-			
+			return objPosition;
+		}
+
+		private static AndroidJavaObject getBannerTypeObject(BannerType bannerType) {
+			int type = 1;
 			// Select type
 			switch(bannerType) {
 			case BannerType.AUTOMATIC:
@@ -321,29 +342,37 @@ namespace StartApp {
 				break;
 			}
 			AndroidJavaObject objType = new AndroidJavaObject("java.lang.Integer", type);
-			
+			return objType;
+		}
+		
+		public static void addBanner() {
+			addBanner(BannerType.AUTOMATIC, BannerPosition.BOTTOM);
+		}
+		
+		public static void addBanner(BannerType bannerType, BannerPosition bannerPosition) {
+			addBanner(bannerType, bannerPosition, null);
+		}
+
+        public static void addBanner(BannerType bannerType, BannerPosition bannerPosition, String adTag) {
 			init();
-			wrapper.Call("addBanner", new []{ objType, objPosition });
+			AndroidJavaObject objPosition = getBannerPositionObject (bannerPosition);
+			AndroidJavaObject objType = getBannerTypeObject (bannerType);
+
+            if (adTag == null) {
+                wrapper.Call("addBanner", new []{ objType, objPosition });
+            } else {
+                AndroidJavaObject objTag = new AndroidJavaObject("java.lang.String", adTag);
+			    wrapper.Call("addBanner", new []{ objType, objPosition, objTag });
+            }
 		}
 		
 		public static void removeBanner() {
 			removeBanner(BannerPosition.BOTTOM);
 		}
 		
-		public static void removeBanner(BannerPosition position) {
-			int pos = 1;
-			// Select position
-			switch(position){
-			case BannerPosition.BOTTOM:
-				pos = 1;
-				break;
-			case BannerPosition.TOP:
-				pos = 2;
-				break;
-			}
-			AndroidJavaObject objPosition = new AndroidJavaObject("java.lang.Integer", pos);
-			
+		public static void removeBanner(BannerPosition bannerPosition) {
 			init();
+			AndroidJavaObject objPosition = getBannerPositionObject(bannerPosition);
 			wrapper.Call("removeBanner", objPosition);
 		}
 		
@@ -351,35 +380,72 @@ namespace StartApp {
 			enableReturnAds = false;
 		}
 
-
+		public static void loadAd() {
+			init ();
+			wrapper.Call("loadAd");
+		}
+		
+		public static bool showAd() {
+			init();
+			return wrapper.Call<bool>("showAd");
+		}
+		
+		
 		/* Initialization */
 		public static void init() {	
 			if (wrapper == null) {
 				initWrapper();
+				initSdk();
+			}
+		}
+
+		public static void init(string appId, bool enableReturnAds) {	
+			if (wrapper == null) {
+				initWrapper();
+				initSdk(appId, enableReturnAds);
+			}
+		}
+
+		public static void init(string accId, string appId, bool enableReturnAds) {	
+			if (wrapper == null) {
+				initWrapper();
+				initSdk(accId, appId, enableReturnAds);
 			}
 		}
 		
-		private static void initWrapper() {
-			AndroidJavaObject jAppId = null;
-			AndroidJavaObject jAccId = null;
-			AndroidJavaObject jEnableReturnAds = null;
-			
+		private static void initWrapper() {			
 			unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
 			currentActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
 			wrapper = new AndroidJavaObject("com.startapp.android.unity.InAppWrapper", currentActivity);
-			
-			if (!initUserData()) {
+		}
+
+		private static void initSdk() {
+			if (!readDataFromTextFile()) {
 				throw new System.ArgumentException("Error in initializing Application ID, Account ID or Return Ads. Please verify your StartAppData.txt file.");
 			}
-			
-			jAppId = new AndroidJavaObject("java.lang.String", applicationId);
-			jAccId = new AndroidJavaObject ("java.lang.String", accountId);
-			jEnableReturnAds = new AndroidJavaObject("java.lang.Boolean", enableReturnAds);
-			
-			wrapper.Call("init", jAccId, jAppId, jEnableReturnAds);
+			if (isAccountIdUsed) { 
+				initSdk (accountId, applicationId, enableReturnAds);
+			} else {
+				initSdk (applicationId, enableReturnAds);
+			}
+		}
+
+		private static void initSdk(string appId, bool returnAds) {
+			initSdk (null, appId, returnAds);
+		}
+
+		private static void initSdk(string accId, string appId, bool returnAds) {
+			jAppId = new AndroidJavaObject("java.lang.String", appId);
+			jEnableReturnAds = new AndroidJavaObject("java.lang.Boolean", returnAds);
+			if (accId == null) {
+				wrapper.Call("init", jAppId, jEnableReturnAds);
+			} else {
+				jAccId = new AndroidJavaObject ("java.lang.String", accId);
+				wrapper.Call ("init", jAccId, jAppId, jEnableReturnAds);
+			}
 		}
 		
-		private static bool initUserData() {
+		private static bool readDataFromTextFile() {
 			bool result = false;
 			int assigned = 0;
 			
@@ -396,8 +462,9 @@ namespace StartApp {
 					applicationId = singleData[1].ToString().Trim();
 				}
 				
-				if (singleData[0].ToLower().CompareTo("accountid") == 0) {
-					assigned++;
+				// Account ID is optional
+				if (singleData[0].ToLower().CompareTo("accountid") == 0 || singleData[0].ToLower().CompareTo("developerid") == 0) {
+					isAccountIdUsed = true;
 					accountId = singleData[1].ToString().Trim();
 				}
 				
@@ -410,10 +477,12 @@ namespace StartApp {
 			}
 			
 			removeSpecialCharacters ();
-			if ((enableReturnAds && assigned == 2) || (!enableReturnAds && assigned == 3)) {
+			if ((enableReturnAds && assigned == 1) || (!enableReturnAds && assigned == 2)) {
 				Debug.Log ("Initialization successful");
 				Debug.Log ("Application ID: " + applicationId);
-				Debug.Log ("Account ID: " + accountId);
+				if (isAccountIdUsed) {
+					Debug.Log ("Account ID: " + accountId);
+				}
 				if (enableReturnAds) {
 					Debug.Log ("Return ads are enabled");
 				}
@@ -427,7 +496,7 @@ namespace StartApp {
 				applicationId = applicationId.Replace("\"", "");
 			}
 			
-			if (accountId != null && accountId.IndexOf ("\"") != -1) {
+			if (isAccountIdUsed && accountId != null && accountId.IndexOf ("\"") != -1) {
 				accountId = accountId.Replace("\"", "");
 			}
 		}

@@ -1,3 +1,2 @@
-accountId=AccountID
 applicationId=ApplicationID
-returnads=true
+returnAds=true
