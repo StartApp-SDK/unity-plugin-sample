@@ -13,6 +13,7 @@ public class StartAppAd : MonoBehaviour {
 	Rect showBannersButton;
 
 	void Start() {
+		StartAppWrapper.init();
 		StartAppWrapper.showSplash ();
 		adEventListener = new AdEventListenerImplementation ();
 		videoListener = new VideoListenerImplementation ();
