@@ -413,6 +413,15 @@ namespace StartApp {
 			}
 		}
 		
+        public static void setUserConsent(string consentType, long timestamp, bool enabled) {
+            init();
+            AndroidJavaObject objConsentType = new AndroidJavaObject("java.lang.String", consentType);
+            AndroidJavaObject objTimestamp = new AndroidJavaObject("java.lang.Long", timestamp);
+            AndroidJavaObject objEnabled = new AndroidJavaObject("java.lang.Boolean", enabled);
+
+            wrapper.Call("setUserConsent", new [] { objConsentType, objTimestamp, objEnabled } );
+        }
+
 		private static void initWrapper() {			
 			unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
 			currentActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
