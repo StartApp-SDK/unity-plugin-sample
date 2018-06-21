@@ -36,6 +36,7 @@ public class StartAppBannerPlugin : MonoBehaviour {
 	}
 
 	private void reloadStartAppBanners() {
+		#if UNITY_ANDROID
 		if (StartAppWrapper.checkIfBannerExists(StartAppWrapper.BannerPosition.BOTTOM)) {
 			StartAppWrapper.removeBanner(StartAppWrapper.BannerPosition.BOTTOM);
 			StartAppWrapper.addBanner(StartAppWrapper.BannerType.AUTOMATIC, StartAppWrapper.BannerPosition.BOTTOM);
@@ -45,5 +46,6 @@ public class StartAppBannerPlugin : MonoBehaviour {
 			StartAppWrapper.removeBanner(StartAppWrapper.BannerPosition.TOP);
 			StartAppWrapper.addBanner(StartAppWrapper.BannerType.AUTOMATIC, StartAppWrapper.BannerPosition.TOP);
 		}
+		#endif
 	}
 }

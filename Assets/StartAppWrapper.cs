@@ -421,7 +421,7 @@ namespace StartApp {
 
             wrapper.Call("setUserConsent", new [] { objConsentType, objTimestamp, objEnabled } );
         }
-
+		
 		private static void initWrapper() {			
 			unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
 			currentActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
