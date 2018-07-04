@@ -8,3 +8,5 @@
 /StartApp_InApp_SDK_Unity_Example.sln
 /StartApp_InApp_SDK_Unity_Example.userprefs
 *.meta
+.vscode
+/obj/Debug
