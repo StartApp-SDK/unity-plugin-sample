@@ -1,5 +1,5 @@
+﻿using System.Collections;
 using UnityEngine;
-using System.Collections;
 using StartApp;
 
 public class StartAppAd : MonoBehaviour {
