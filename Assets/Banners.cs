@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using StartApp;
 
 public class Banners : MonoBehaviour {
@@ -21,7 +22,7 @@ public class Banners : MonoBehaviour {
 		if (GUI.Button(backRect, "Back", guiStyle) || Input.GetKeyUp (KeyCode.Escape)) {
 			StartAppWrapper.removeBanner(StartAppWrapper.BannerPosition.TOP);
 			StartAppWrapper.removeBanner (StartAppWrapper.BannerPosition.BOTTOM);
-			Application.LoadLevel(0);
+			SceneManager.LoadScene("StartApp", LoadSceneMode.Single);
 		}
 	}
 }

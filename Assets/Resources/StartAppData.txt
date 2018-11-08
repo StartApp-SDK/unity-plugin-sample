@@ -1,2 +1,2 @@
-applicationId=ApplicationID
+applicationId=ApplicationId
 returnAds=true

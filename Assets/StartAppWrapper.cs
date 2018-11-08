@@ -34,6 +34,12 @@ namespace StartApp {
 		public interface VideoListener {
 			void onVideoCompleted();
 		}
+
+		public interface BannerListener {
+			void onReceiveAd();
+			void onFailedToReceiveAd(string errorMessage);
+			void onClick();
+		}
 		
 		public enum AdMode {
 			AUTOMATIC = 1,
@@ -101,6 +107,53 @@ namespace StartApp {
 				AndroidJavaObject orientationIndexInteger = new AndroidJavaObject("java.lang.Integer", orientationIndex);
 				wrapper.Call<AndroidJavaObject>("setOrientation", getJavaSplashConfig(), orientationIndexInteger);
 				return this;
+			}
+		}
+
+		/* Implementation of Banner Listener for Unity */
+		private class ImplementationBannerListener : AndroidJavaProxy {
+			private BannerListener listener = null;
+			
+			public ImplementationBannerListener(BannerListener listener) : base("com.startapp.android.unity.AdBannerListener") {
+				this.listener = listener;
+			}
+			
+			void onReceiveAd() {
+				if (listener != null) {
+					listener.onReceiveAd();
+				}
+			}
+			
+			void onFailedToReceiveAd(string errorMessage) {
+				if (listener != null) {
+					listener.onFailedToReceiveAd(errorMessage);
+				}
+			}
+
+			void onClick() {
+				if (listener != null) {
+					listener.onClick();
+				}
+			}
+			
+			int hashCode() {
+				if (listener != null) {
+					return listener.GetHashCode();
+				}
+				return 0;
+			}
+			
+			bool equals(AndroidJavaObject o) {
+				if (listener == null) {
+					return false;
+				}
+				int otherHash = o.Call<int>("hashCode");
+				return otherHash == listener.GetHashCode();
+			}
+			
+			// Without this we get null when printing 
+			String toString() {
+				return "ImplementationBannerListener: " + hashCode();
 			}
 		}
 		
@@ -350,19 +403,36 @@ namespace StartApp {
 		}
 		
 		public static void addBanner(BannerType bannerType, BannerPosition bannerPosition) {
-			addBanner(bannerType, bannerPosition, null);
+			addBanner(bannerType, bannerPosition, null, null);
 		}
 
-        public static void addBanner(BannerType bannerType, BannerPosition bannerPosition, String adTag) {
+		public static void addBanner(BannerType bannerType, BannerPosition bannerPosition, String adTag) {
+			addBanner(bannerType, bannerPosition, adTag, null);
+		}
+
+		public static void addBanner(BannerType bannerType, BannerPosition bannerPosition, BannerListener listener) {
+			addBanner(bannerType, bannerPosition, null, listener);
+		}
+
+        public static void addBanner(BannerType bannerType, BannerPosition bannerPosition, String adTag, BannerListener listener) {
 			init();
 			AndroidJavaObject objPosition = getBannerPositionObject (bannerPosition);
 			AndroidJavaObject objType = getBannerTypeObject (bannerType);
 
-            if (adTag == null) {
-                wrapper.Call("addBanner", new []{ objType, objPosition });
-            } else {
-                AndroidJavaObject objTag = new AndroidJavaObject("java.lang.String", adTag);
-			    wrapper.Call("addBanner", new []{ objType, objPosition, objTag });
+			if (adTag == null) {
+				if (listener == null) {
+					wrapper.Call("addBanner", new []{ objType, objPosition });
+				} else {
+					wrapper.Call("addBanner", new object[]{ objType, objPosition, null, new ImplementationBannerListener(listener) });
+				}
+			} else {
+				AndroidJavaObject objTag = new AndroidJavaObject("java.lang.String", adTag);
+
+				if (listener == null) {
+					wrapper.Call("addBanner", new []{ objType, objPosition, objTag });
+				} else {
+					wrapper.Call("addBanner", new object[]{ objType, objPosition, objTag, new ImplementationBannerListener(listener) });
+				}
             }
 		}
 		
