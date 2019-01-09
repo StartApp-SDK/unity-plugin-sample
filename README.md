@@ -1,7 +1,7 @@
 [StartApp][] InApp SDK Unity Example Project
 ======================================
 
-*Updated to InApp SDK version 3.11.1*
+*Updated to InApp SDK version 3.12.0*
 
 This Unity project provides an example of the [StartApp][] InApp SDK Unity integration.
 
