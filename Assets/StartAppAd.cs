@@ -1,22 +1,20 @@
-﻿using System.Collections;
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using StartApp;
 
-public class StartAppAd : MonoBehaviour {
-
-	StartAppWrapper.AdEventListener adEventListener;
-	StartAppWrapper.VideoListener videoListener;
+public class StartAppAd : MonoBehaviour
+{
 	GUIStyle guiStyle;
 	Rect showFullscreenButton;
 	Rect showOfferwallButton;
 	Rect showRewardedVideoButton;
 	Rect showBannersButton;
 	Rect showPersonalizedAdsButton;
-	bool startAppInitialized = false;
+	bool startAppInitialized;
 
-	void Start() {
+	void Start()
+    {
 		initStartAppSdkAccordingToConsent(() => {
 			startAppInitialized = true;
 		});
@@ -24,12 +22,15 @@ public class StartAppAd : MonoBehaviour {
 		Debug.Log("StartAppSDK start initializing");
 	}
 
-	void OnGUI () {
-		if (!startAppInitialized) {
+	void OnGUI()
+    {
+		if (!startAppInitialized)
+        {
 			return;
 		}
 
 		initializeButtons();
+
 		/* STARTAPP ADS */
 		addShowFullscreenButton(showFullscreenButton);
 		addShowOfferwallButton(showOfferwallButton);
@@ -38,80 +39,110 @@ public class StartAppAd : MonoBehaviour {
 		addShowPersonalizedAdsButton(showPersonalizedAdsButton);
 	}
 
-	void showGdprDialog(Action callback) {
+	void showGdprDialog(Action callback)
+    {
 		ModalDialog.Instance().Choice(
 			() => {
-				if (callback != null) {
+				if (callback != null)
+                {
 					callback();
 				}
 				writePersonalizedAdsConsent(true);
 			},
 			() => {
-				if (callback != null) {
+				if (callback != null)
+                {
 					callback();
 				}
 				writePersonalizedAdsConsent(false);
 			});
 	}
 
-	void writePersonalizedAdsConsent(bool isGranted) {
+	void writePersonalizedAdsConsent(bool isGranted)
+    {
 		Debug.Log("StartAppSDK setUserConsent: " + isGranted);
 
-		StartAppWrapper.setUserConsent("pas",
-                            (long)(DateTime.UtcNow.Subtract(new DateTime (1970, 1, 1))).TotalMilliseconds,                        
-                            isGranted);
+        AdSdk.Instance.SetUserConsent(
+                            "pas",
+                            isGranted,
+                            (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds);
 
-		PlayerPrefs.SetInt("gdpr_dialog_was_shown", 1);
+        PlayerPrefs.SetInt("gdpr_dialog_was_shown", 1);
 		PlayerPrefs.Save();
 	}
 
-	void initStartAppSdk() {
-		StartAppWrapper.init();
-		adEventListener = new AdEventListenerImplementation();
-		videoListener = new VideoListenerImplementation();
-		StartAppWrapper.setVideoListener(videoListener);
-	}
-
-	void initStartAppSdkAccordingToConsent(Action callback) {
-		if (PlayerPrefs.HasKey("gdpr_dialog_was_shown")) {
-			initStartAppSdk();
-			StartAppWrapper.showSplash();
-			callback();
+	void initStartAppSdkAccordingToConsent(Action callback)
+    {
+		if (PlayerPrefs.HasKey("gdpr_dialog_was_shown"))
+        {
+            AdSdk.Instance.ShowSplash();
+            callback();
 			return;
 		}
 
-		showGdprDialog(() => {
-			initStartAppSdk();
-			callback();
-		});
+        showGdprDialog(callback);
 	}
 
-	public void addShowFullscreenButton(Rect showFullscreenButton) {
-		if (GUI.Button(showFullscreenButton, "Show Fullscreen", guiStyle)) {
-			StartAppWrapper.loadAd(StartAppWrapper.AdMode.FULLPAGE, adEventListener);
+    private InterstitialAd loadInterstitial()
+    {
+        var ad = AdSdk.Instance.CreateInterstitial();
+
+        ad.RaiseAdLoaded += (sender, e) => {
+            Debug.Log("Ad loaded");
+            ad.ShowAd();
+        };
+
+        ad.RaiseAdLoadingFailed += (sender, e) => {
+            Debug.Log(string.Format("Error {0}", e.Message));
+        };
+
+        ad.RaiseAdShown += (sender, e) => Debug.Log("Ad shown");
+        ad.RaiseAdClosed += (sender, e) => Debug.Log("Ad closed");
+        ad.RaiseAdClicked += (sender, e) => Debug.Log("Ad clicked");
+
+        return ad;
+    }
+
+    public void addShowFullscreenButton(Rect showFullscreenButton)
+    {
+		if (GUI.Button(showFullscreenButton, "Show Fullscreen", guiStyle))
+        {
+            var ad = loadInterstitial();
+            ad.LoadAd(InterstitialAd.AdType.FullScreen);
 		}
 	}
 
-	public void addShowOfferwallButton(Rect showOfferwallButton) {
-		if (GUI.Button(showOfferwallButton, "Show Offerwall", guiStyle)) {
-			StartAppWrapper.loadAd(StartAppWrapper.AdMode.OFFERWALL, adEventListener);
-		}
+	public void addShowOfferwallButton(Rect showOfferwallButton)
+    {
+		if (GUI.Button(showOfferwallButton, "Show Offerwall", guiStyle))
+        {
+            var ad = loadInterstitial();
+            ad.LoadAd(InterstitialAd.AdType.OfferWall);
+        }
 	}
 
-	public void addShowRewardedVideoButton(Rect showRewardedVideoButton) {
-		if (GUI.Button(showRewardedVideoButton, "Show Rewarded Video", guiStyle)) {
-			StartAppWrapper.loadAd(StartAppWrapper.AdMode.REWARDED_VIDEO, adEventListener);
-		}
+	public void addShowRewardedVideoButton(Rect showRewardedVideoButton)
+    {
+		if (GUI.Button(showRewardedVideoButton, "Show Rewarded Video", guiStyle))
+        {
+            var ad = loadInterstitial();
+            ad.RaiseAdVideoCompleted += (sender, e) => Debug.Log("Ad video completed");
+            ad.LoadAd(InterstitialAd.AdType.Rewarded);
+        }
 	}
 
-	public void addShowBannersButton(Rect showBannersButton) {
-		if (GUI.Button(showBannersButton, "Show Banners", guiStyle)) {
+	public void addShowBannersButton(Rect showBannersButton)
+    {
+		if (GUI.Button(showBannersButton, "Show Banners", guiStyle))
+        {
 			SceneManager.LoadScene("Banners", LoadSceneMode.Single);
 		}
 	}
 
-	public void addShowPersonalizedAdsButton(Rect showPersonalizedAdsButton) {
-		if (GUI.Button(showPersonalizedAdsButton, "Personalized Ads Setting", guiStyle)) {
+	public void addShowPersonalizedAdsButton(Rect showPersonalizedAdsButton)
+    {
+		if (GUI.Button(showPersonalizedAdsButton, "Personalized Ads Setting", guiStyle))
+        {
 			startAppInitialized = false;
 			showGdprDialog(() => {
 				startAppInitialized = true;
@@ -119,7 +150,8 @@ public class StartAppAd : MonoBehaviour {
 		}
 	}
 
-	public void initializeButtons() {
+	public void initializeButtons()
+    {
 		/* Determine buttons size */
 		int buttonHeight = Screen.height / 7;
 		showFullscreenButton = new Rect(0, buttonHeight, Screen.width, buttonHeight);
@@ -130,45 +162,13 @@ public class StartAppAd : MonoBehaviour {
 		
 		/* Change text size and logo size according to screen orientation */
 		guiStyle = new GUIStyle(GUI.skin.button);
-		if (Screen.orientation == ScreenOrientation.Portrait) {
+		if (Screen.orientation == ScreenOrientation.Portrait)
+        {
 			guiStyle.fontSize = Screen.width / 14;
-		} else {
+		}
+        else
+        {
 			guiStyle.fontSize = Screen.height / 14;
-		}
-	}
-
-	/* AdEventListener callbacks */
-	public class AdEventListenerImplementation : StartAppWrapper.AdEventListener {
-		StartAppWrapper.AdDisplayListener adDisplayListener = new AdDisplayListenerImplementation ();
-
-		public void onReceiveAd() {
-			Debug.Log("Ad received");
-			StartAppWrapper.showAd(adDisplayListener);
-		}
-		
-		public void onFailedToReceiveAd() {
-			Debug.Log("Ad failed to receive");
-		}
-	}
-
-	public class AdDisplayListenerImplementation: StartAppWrapper.AdDisplayListener {
-		public void adHidden() {
-			Debug.Log("Ad Hidden");
-		}
-
-		public void adDisplayed() {
-			Debug.Log("Ad Displayed");
-		}
-
-		public void adClicked() {
-			Debug.Log("Ad Clicked");
-		}
-	}
-
-	/* VideoListener callback */
-	public class VideoListenerImplementation: StartAppWrapper.VideoListener {
-		public void onVideoCompleted() {
-			Debug.Log("Rewarded Video Completed");
 		}
 	}
 }
