@@ -360,9 +360,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8626338a606d54156988e45203386f19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  okButton: {fileID: 1921237932}
-  cancelButton: {fileID: 937487447}
-  modalDialogObject: {fileID: 1382257614}
+  mOkButton: {fileID: 1921237932}
+  mCancelButton: {fileID: 937487447}
+  mModalDialogObject: {fileID: 1382257614}
 --- !u!1 &745334191
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,38 +4,38 @@ using StartApp;
 
 public class Banners : MonoBehaviour
 {
-    BannerAd topBanner;
-    BannerAd bottomBanner;
+    BannerAd mTopBanner;
+    BannerAd mBottomBanner;
 
     void Start()
     {
-        topBanner = AdSdk.Instance.CreateBanner();
-        topBanner.ShowInPosition(BannerAd.BannerPosition.Top);
+        mTopBanner = AdSdk.Instance.CreateBanner();
+        mTopBanner.ShowInPosition(BannerAd.BannerPosition.Top);
 
-        bottomBanner = AdSdk.Instance.CreateBanner();
-        bottomBanner.ShowInPosition(BannerAd.BannerPosition.Bottom);
-	}
+        mBottomBanner = AdSdk.Instance.CreateBanner();
+        mBottomBanner.ShowInPosition(BannerAd.BannerPosition.Bottom);
+    }
 
-	void OnGUI()
+    void OnGUI()
     {
-		int buttonHeight = Screen.height / 5;
-		Rect backRect = new Rect(0, 2 * buttonHeight, Screen.width, buttonHeight);
-		GUIStyle guiStyle = new GUIStyle(GUI.skin.button);
+        int buttonHeight = Screen.height / 5;
+        Rect backRect = new Rect(0, 2 * buttonHeight, Screen.width, buttonHeight);
+        GUIStyle guiStyle = new GUIStyle(GUI.skin.button);
 
-		if (Screen.orientation == ScreenOrientation.Portrait)
+        if (Screen.orientation == ScreenOrientation.Portrait)
         {
-			guiStyle.fontSize = Screen.width / 12;
-		}
+            guiStyle.fontSize = Screen.width / 12;
+        }
         else
         {
-			guiStyle.fontSize = Screen.height / 12;
-		}
+            guiStyle.fontSize = Screen.height / 12;
+        }
 
-		if (GUI.Button(backRect, "Back", guiStyle) || Input.GetKeyUp (KeyCode.Escape))
+        if (GUI.Button(backRect, "Back", guiStyle) || Input.GetKeyUp(KeyCode.Escape))
         {
-            topBanner.Hide();
-            bottomBanner.Hide();
-			SceneManager.LoadScene("StartApp", LoadSceneMode.Single);
-		}
-	}
+            mTopBanner.Hide();
+            mBottomBanner.Hide();
+            SceneManager.LoadScene("StartApp", LoadSceneMode.Single);
+        }
+    }
 }

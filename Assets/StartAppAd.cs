@@ -5,62 +5,65 @@ using StartApp;
 
 public class StartAppAd : MonoBehaviour
 {
-	GUIStyle guiStyle;
-	Rect showFullscreenButton;
-	Rect showOfferwallButton;
-	Rect showRewardedVideoButton;
-	Rect showBannersButton;
-	Rect showPersonalizedAdsButton;
-	bool startAppInitialized;
+    GUIStyle mGuiStyle;
+    Rect mShowFullscreenButton;
+    Rect mShowOfferwallButton;
+    Rect mShowRewardedVideoButton;
+    Rect mShowBannersButton;
+    Rect mShowPersonalizedAdsButton;
+    bool mStartAppInitialized;
 
-	void Start()
+    void Start()
     {
-		initStartAppSdkAccordingToConsent(() => {
-			startAppInitialized = true;
-		});
-
-		Debug.Log("StartAppSDK start initializing");
-	}
-
-	void OnGUI()
-    {
-		if (!startAppInitialized)
+        InitStartAppSdkAccordingToConsent(() =>
         {
-			return;
-		}
+            mStartAppInitialized = true;
+        });
 
-		initializeButtons();
+        Debug.Log("StartAppSDK start initializing");
+    }
 
-		/* STARTAPP ADS */
-		addShowFullscreenButton(showFullscreenButton);
-		addShowOfferwallButton(showOfferwallButton);
-		addShowRewardedVideoButton(showRewardedVideoButton);
-		addShowBannersButton(showBannersButton);
-		addShowPersonalizedAdsButton(showPersonalizedAdsButton);
-	}
-
-	void showGdprDialog(Action callback)
+    void OnGUI()
     {
-		ModalDialog.Instance().Choice(
-			() => {
-				if (callback != null)
-                {
-					callback();
-				}
-				writePersonalizedAdsConsent(true);
-			},
-			() => {
-				if (callback != null)
-                {
-					callback();
-				}
-				writePersonalizedAdsConsent(false);
-			});
-	}
+        if (!mStartAppInitialized)
+        {
+            return;
+        }
 
-	void writePersonalizedAdsConsent(bool isGranted)
+        InitializeButtons();
+
+        /* STARTAPP ADS */
+        AddShowFullscreenButton(mShowFullscreenButton);
+        AddShowOfferwallButton(mShowOfferwallButton);
+        AddShowRewardedVideoButton(mShowRewardedVideoButton);
+        AddShowBannersButton(mShowBannersButton);
+        AddShowPersonalizedAdsButton(mShowPersonalizedAdsButton);
+    }
+
+    void ShowGdprDialog(Action callback)
     {
-		Debug.Log("StartAppSDK setUserConsent: " + isGranted);
+        ModalDialog.Instance().Choice(
+            () =>
+            {
+                if (callback != null)
+                {
+                    callback();
+                }
+                WritePersonalizedAdsConsent(true);
+            },
+            () =>
+            {
+                if (callback != null)
+                {
+                    callback();
+                }
+                WritePersonalizedAdsConsent(false);
+            });
+    }
+
+    void WritePersonalizedAdsConsent(bool isGranted)
+    {
+        Debug.Log("StartAppSDK setUserConsent: " + isGranted);
 
         AdSdk.Instance.SetUserConsent(
                             "pas",
@@ -68,31 +71,33 @@ public class StartAppAd : MonoBehaviour
                             (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds);
 
         PlayerPrefs.SetInt("gdpr_dialog_was_shown", 1);
-		PlayerPrefs.Save();
-	}
+        PlayerPrefs.Save();
+    }
 
-	void initStartAppSdkAccordingToConsent(Action callback)
+    void InitStartAppSdkAccordingToConsent(Action callback)
     {
-		if (PlayerPrefs.HasKey("gdpr_dialog_was_shown"))
+        if (PlayerPrefs.HasKey("gdpr_dialog_was_shown"))
         {
             AdSdk.Instance.ShowSplash();
             callback();
-			return;
-		}
+            return;
+        }
 
-        showGdprDialog(callback);
-	}
+        ShowGdprDialog(callback);
+    }
 
-    private InterstitialAd loadInterstitial()
+    private InterstitialAd LoadInterstitial()
     {
         var ad = AdSdk.Instance.CreateInterstitial();
 
-        ad.RaiseAdLoaded += (sender, e) => {
+        ad.RaiseAdLoaded += (sender, e) =>
+        {
             Debug.Log("Ad loaded");
             ad.ShowAd();
         };
 
-        ad.RaiseAdLoadingFailed += (sender, e) => {
+        ad.RaiseAdLoadingFailed += (sender, e) =>
+        {
             Debug.Log(string.Format("Error {0}", e.Message));
         };
 
@@ -103,72 +108,73 @@ public class StartAppAd : MonoBehaviour
         return ad;
     }
 
-    public void addShowFullscreenButton(Rect showFullscreenButton)
+    public void AddShowFullscreenButton(Rect showFullscreenButton)
     {
-		if (GUI.Button(showFullscreenButton, "Show Fullscreen", guiStyle))
+        if (GUI.Button(showFullscreenButton, "Show Fullscreen", mGuiStyle))
         {
-            var ad = loadInterstitial();
+            var ad = LoadInterstitial();
             ad.LoadAd(InterstitialAd.AdType.FullScreen);
-		}
-	}
+        }
+    }
 
-	public void addShowOfferwallButton(Rect showOfferwallButton)
+    public void AddShowOfferwallButton(Rect showOfferwallButton)
     {
-		if (GUI.Button(showOfferwallButton, "Show Offerwall", guiStyle))
+        if (GUI.Button(showOfferwallButton, "Show Offerwall", mGuiStyle))
         {
-            var ad = loadInterstitial();
+            var ad = LoadInterstitial();
             ad.LoadAd(InterstitialAd.AdType.OfferWall);
         }
-	}
+    }
 
-	public void addShowRewardedVideoButton(Rect showRewardedVideoButton)
+    public void AddShowRewardedVideoButton(Rect showRewardedVideoButton)
     {
-		if (GUI.Button(showRewardedVideoButton, "Show Rewarded Video", guiStyle))
+        if (GUI.Button(showRewardedVideoButton, "Show Rewarded Video", mGuiStyle))
         {
-            var ad = loadInterstitial();
+            var ad = LoadInterstitial();
             ad.RaiseAdVideoCompleted += (sender, e) => Debug.Log("Ad video completed");
             ad.LoadAd(InterstitialAd.AdType.Rewarded);
         }
-	}
+    }
 
-	public void addShowBannersButton(Rect showBannersButton)
+    public void AddShowBannersButton(Rect showBannersButton)
     {
-		if (GUI.Button(showBannersButton, "Show Banners", guiStyle))
+        if (GUI.Button(showBannersButton, "Show Banners", mGuiStyle))
         {
-			SceneManager.LoadScene("Banners", LoadSceneMode.Single);
-		}
-	}
+            SceneManager.LoadScene("Banners", LoadSceneMode.Single);
+        }
+    }
 
-	public void addShowPersonalizedAdsButton(Rect showPersonalizedAdsButton)
+    public void AddShowPersonalizedAdsButton(Rect showPersonalizedAdsButton)
     {
-		if (GUI.Button(showPersonalizedAdsButton, "Personalized Ads Setting", guiStyle))
+        if (GUI.Button(showPersonalizedAdsButton, "Personalized Ads Setting", mGuiStyle))
         {
-			startAppInitialized = false;
-			showGdprDialog(() => {
-				startAppInitialized = true;
-			});
-		}
-	}
+            mStartAppInitialized = false;
+            ShowGdprDialog(() =>
+            {
+                mStartAppInitialized = true;
+            });
+        }
+    }
 
-	public void initializeButtons()
+    public void InitializeButtons()
     {
-		/* Determine buttons size */
-		int buttonHeight = Screen.height / 7;
-		showFullscreenButton = new Rect(0, buttonHeight, Screen.width, buttonHeight);
-		showOfferwallButton = new Rect(0, 2 * buttonHeight, Screen.width, buttonHeight);
-		showRewardedVideoButton = new Rect(0, 3 * buttonHeight, Screen.width, buttonHeight);
-		showBannersButton = new Rect(0, 4 * buttonHeight, Screen.width, buttonHeight);
-		showPersonalizedAdsButton = new Rect(0, 5 * buttonHeight, Screen.width, buttonHeight);
-		
-		/* Change text size and logo size according to screen orientation */
-		guiStyle = new GUIStyle(GUI.skin.button);
-		if (Screen.orientation == ScreenOrientation.Portrait)
+        /* Determine buttons size */
+        int buttonHeight = Screen.height / 7;
+        mShowFullscreenButton = new Rect(0, buttonHeight, Screen.width, buttonHeight);
+        mShowOfferwallButton = new Rect(0, 2 * buttonHeight, Screen.width, buttonHeight);
+        mShowRewardedVideoButton = new Rect(0, 3 * buttonHeight, Screen.width, buttonHeight);
+        mShowBannersButton = new Rect(0, 4 * buttonHeight, Screen.width, buttonHeight);
+        mShowPersonalizedAdsButton = new Rect(0, 5 * buttonHeight, Screen.width, buttonHeight);
+
+        /* Change text size and logo size according to screen orientation */
+        mGuiStyle = new GUIStyle(GUI.skin.button);
+        if (Screen.orientation == ScreenOrientation.Portrait)
         {
-			guiStyle.fontSize = Screen.width / 14;
-		}
+            mGuiStyle.fontSize = Screen.width / 14;
+        }
         else
         {
-			guiStyle.fontSize = Screen.height / 14;
-		}
-	}
+            mGuiStyle.fontSize = Screen.height / 14;
+        }
+    }
 }
