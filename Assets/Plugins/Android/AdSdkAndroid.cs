@@ -1,4 +1,20 @@
-﻿#if UNITY_ANDROID
+﻿/*
+Copyright 2019 StartApp Inc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#if UNITY_ANDROID
 
 using System;
 using UnityEngine;
@@ -58,13 +74,13 @@ namespace StartApp
             Activity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
 
             var jAppId = new AndroidJavaObject("java.lang.String", appId);
-            var sdk = new AndroidJavaClass("com.startapp.android.publish.adsCommon.StartAppSDK");
+            var sdk = new AndroidJavaClass("com.startapp.sdk.adsbase.StartAppSDK");
 
             var wrapperName = new AndroidJavaObject("java.lang.String", "Unity");
             var wrapperVer = new AndroidJavaObject("java.lang.String", WrapperVersion);
             sdk.CallStatic("addWrapper", Activity, wrapperName, wrapperVer);
 
-            var ad = new AndroidJavaClass("com.startapp.android.publish.adsCommon.StartAppAd");
+            var ad = new AndroidJavaClass("com.startapp.sdk.adsbase.StartAppAd");
             ad.CallStatic("disableSplash");
 
             if (string.IsNullOrEmpty(accId))
@@ -103,7 +119,7 @@ namespace StartApp
         {
             Setup();
             AndroidJavaObject objConsentType = new AndroidJavaObject("java.lang.String", consentType);
-            var sdk = new AndroidJavaClass("com.startapp.android.publish.adsCommon.StartAppSDK");
+            var sdk = new AndroidJavaClass("com.startapp.sdk.adsbase.StartAppSDK");
             sdk.CallStatic("setUserConsent", Activity, objConsentType, timestamp, enabled);
         }
 
@@ -116,7 +132,7 @@ namespace StartApp
 
             Setup();
 
-            var jad = new AndroidJavaClass("com.startapp.android.publish.adsCommon.StartAppAd");
+            var jad = new AndroidJavaClass("com.startapp.sdk.adsbase.StartAppAd");
             if (config == null)
             {
                 jad.CallStatic("showSplash", Activity, null);
@@ -124,7 +140,7 @@ namespace StartApp
                 return;
             }
 
-            var jconfig = new AndroidJavaObject("com.startapp.android.publish.ads.splash.SplashConfig");
+            var jconfig = new AndroidJavaObject("com.startapp.sdk.ads.splash.SplashConfig");
 
             if (config.AppName != null)
             {
@@ -144,11 +160,11 @@ namespace StartApp
             }
 
             int themeIndex = (int)config.TemplateTheme + 1; // +1 for Android because the theme enum starts from 1
-            var themeClass = new AndroidJavaClass("com.startapp.android.publish.ads.splash.SplashConfig$Theme");
+            var themeClass = new AndroidJavaClass("com.startapp.sdk.ads.splash.SplashConfig$Theme");
             jconfig.Call<AndroidJavaObject>("setTheme", themeClass.CallStatic<AndroidJavaObject>("getByIndex", themeIndex));
 
             int orientationIndex = (int)config.ScreenOrientation + 1; // +1 for Android because the orientation enum starts from 1
-            var orientationClass = new AndroidJavaClass("com.startapp.android.publish.ads.splash.SplashConfig$Orientation");
+            var orientationClass = new AndroidJavaClass("com.startapp.sdk.ads.splash.SplashConfig$Orientation");
             jconfig.Call<AndroidJavaObject>("setOrientation", orientationClass.CallStatic<AndroidJavaObject>("getByIndex", orientationIndex));
 
             jad.CallStatic("showSplash", Activity, null, jconfig);

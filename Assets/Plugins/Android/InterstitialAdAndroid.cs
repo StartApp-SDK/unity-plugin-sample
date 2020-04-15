@@ -1,4 +1,20 @@
-﻿#if UNITY_ANDROID
+﻿/*
+Copyright 2019 StartApp Inc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#if UNITY_ANDROID
 
 using UnityEngine;
 
@@ -15,7 +31,7 @@ namespace StartApp
 
         public InterstitialAdAndroid()
         {
-            mjStartAppAd = new AndroidJavaObject("com.startapp.android.publish.adsCommon.StartAppAd", AdSdkAndroid.ImplInstance.Activity);
+            mjStartAppAd = new AndroidJavaObject("com.startapp.sdk.adsbase.StartAppAd", AdSdkAndroid.ImplInstance.Activity);
             mjStartAppAd.Call("setVideoListener", new ImplementationVideoListener(this));
         }
 
@@ -44,7 +60,7 @@ namespace StartApp
         {
             readonly InterstitialAdAndroid mParent;
 
-            public ImplementationAdEventListener(InterstitialAdAndroid parent) : base("com.startapp.android.publish.adsCommon.adListeners.AdEventListener")
+            public ImplementationAdEventListener(InterstitialAdAndroid parent) : base("com.startapp.sdk.adsbase.adlisteners.AdEventListener")
             {
                 mParent = parent;
             }
@@ -65,7 +81,7 @@ namespace StartApp
         {
             readonly InterstitialAdAndroid mParent;
 
-            public ImplementationAdDisplayListener(InterstitialAdAndroid parent) : base("com.startapp.android.publish.adsCommon.adListeners.AdDisplayListener")
+            public ImplementationAdDisplayListener(InterstitialAdAndroid parent) : base("com.startapp.sdk.adsbase.adlisteners.AdDisplayListener")
             {
                 mParent = parent;
             }
@@ -90,7 +106,7 @@ namespace StartApp
         {
             readonly InterstitialAdAndroid mParent;
 
-            public ImplementationVideoListener(InterstitialAdAndroid parent) : base("com.startapp.android.publish.adsCommon.VideoListener")
+            public ImplementationVideoListener(InterstitialAdAndroid parent) : base("com.startapp.sdk.adsbase.VideoListener")
             {
                 mParent = parent;
             }
@@ -103,7 +119,7 @@ namespace StartApp
 
         static AndroidJavaObject GetJAdType(AdType adMode)
         {
-            var jModeClass = new AndroidJavaClass("com.startapp.android.publish.adsCommon.StartAppAd$AdMode");
+            var jModeClass = new AndroidJavaClass("com.startapp.sdk.adsbase.StartAppAd$AdMode");
             switch (adMode)
             {
                 case AdType.Automatic: return jModeClass.GetStatic<AndroidJavaObject>("AUTOMATIC");

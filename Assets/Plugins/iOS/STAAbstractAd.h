@@ -3,11 +3,12 @@
 //  StartAppAdSDK
 //
 //  Copyright (c) 2013 StartApp. All rights reserved.
-//  SDK version 3.11.0
+//  SDK version 4.3.0
 
 #import <Foundation/Foundation.h>
 
 @class STAAbstractAd;
+@class STANativeAdDetails;
 @protocol STADelegateProtocol <NSObject>
 @optional
 
@@ -19,6 +20,7 @@
 - (void) didClickAd:(STAAbstractAd*)ad;
 - (void) didCloseInAppStore:(STAAbstractAd*)ad;
 - (void) didCompleteVideo:(STAAbstractAd*)ad;
+- (void) didClickNativeAdDetails:(STANativeAdDetails *)nativeAdDetails;
 
 @end
 
