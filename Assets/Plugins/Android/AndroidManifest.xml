@@ -28,7 +28,7 @@
         </activity>
 
 		<!-- StartApp SDK -->
-		<provider
+        <provider
             android:name="com.startapp.sdk.adsbase.StartAppInitProvider"
             android:authorities="${applicationId}.startappinitprovider"
             tools:node="remove" />
