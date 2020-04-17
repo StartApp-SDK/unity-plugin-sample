@@ -1,4 +1,4 @@
-[StartApp][] InApp SDK Unity Sample Project
+[StartApp][] Unity Sample Project
 ======================================
 
 *Updated to InApp SDK version 1.0.9*
